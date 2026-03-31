@@ -26,16 +26,11 @@ const ResultViewer = ({ resultUrl, scanData, onStartOver, onSetResultUrl, sample
   const [wireframe,   setWireframe]   = useState(false);
   const [autoRotate,  setAutoRotate]  = useState(true);
   const [viewerKey,   setViewerKey]   = useState(0);
-  const [urlInput,    setUrlInput]    = useState(resultUrl || '');
   const [isLoading,   setIsLoading]   = useState(false);
 
   const accentColor = wireframe ? '#3E4A5A' : '#E8D5C3';
 
   const handleReset = () => setViewerKey(k => k + 1);
-
-  useEffect(() => {
-    setUrlInput(resultUrl || '');
-  }, [resultUrl]);
 
   const canRender = Boolean(resultUrl);
 
@@ -54,37 +49,6 @@ const ResultViewer = ({ resultUrl, scanData, onStartOver, onSetResultUrl, sample
         <button className={styles.startOverBtn} onClick={onStartOver}>
           <UploadIcon /> New Scan
         </button>
-      </div>
-
-      {/* ── URL Bar (temporary until API wired) ────────────────────────────── */}
-      <div className={styles.urlBar}>
-        <div className={styles.urlLeft}>
-          <div className={styles.urlLabel}>AI STL URL</div>
-          <input
-            className={styles.urlInput}
-            value={urlInput}
-            onChange={(e) => setUrlInput(e.target.value)}
-            placeholder="/models/your-ai-output.stl or https://..."
-          />
-        </div>
-        <div className={styles.urlActions}>
-          <button
-            className={styles.urlBtn}
-            onClick={() => (typeof onSetResultUrl === 'function' ? onSetResultUrl(urlInput?.trim() || null) : undefined)}
-            disabled={!urlInput.trim()}
-          >
-            Load Result
-          </button>
-          {sampleResultUrl ? (
-            <button
-              className={styles.urlBtnSecondary}
-              onClick={() => (typeof onSetResultUrl === 'function' ? onSetResultUrl(sampleResultUrl) : undefined)}
-              title="Load sample STL from public/models"
-            >
-              Load Sample
-            </button>
-          ) : null}
-        </div>
       </div>
 
       {/* ── Main 3D Viewer ─────────────────────────────────────────────────── */}

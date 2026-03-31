@@ -22,22 +22,22 @@ const SHIELD_OPTIONS = [
   {
     value: 'lateral_left',
     label: 'Lateral Left',
-    desc: 'Shields left lateral teeth & soft tissue from scatter radiation',
+    // desc: 'Shields left lateral teeth & soft tissue from scatter radiation',
   },
   {
     value: 'lateral_right',
     label: 'Lateral Right',
-    desc: 'Shields right lateral teeth from direct beam exposure',
+    // desc: 'Shields right lateral teeth from direct beam exposure',
   },
   {
     value: 'reduced',
-    label: 'Reduced Coverage',
-    desc: 'Minimal coverage for early-stage treatment preservation',
+    label: 'Depress',
+    // desc: 'Minimal coverage for early-stage treatment preservation',
   },
   {
     value: 'upper',
-    label: 'Upper Arch Full',
-    desc: 'Full upper arch protection for comprehensive radiation planning',
+    label: 'Elevate',
+    // desc: 'Full upper arch protection for comprehensive radiation planning',
   },
 ];
 
@@ -94,7 +94,7 @@ const UploadStep = ({ onConfirm }) => {
   // ── Confirm ─────────────────────────────────────────────────────────────────
   const handleConfirm = () => {
     if (typeof onConfirm === 'function') {
-      onConfirm({ toothType, stentOption, shieldOption, scan1: file1, scan2: file2 });
+      onConfirm({ shieldOption, scan1: file1, scan2: file2 });
     }
   };
 
@@ -219,59 +219,14 @@ const UploadStep = ({ onConfirm }) => {
             </div>
           </div>
 
-          {/* Section: Jaw Position */}
-          <div className={styles.sectionCard}>
-            <div className={styles.sectionHeader}>
-              <ToothIcon />
-              <span>Jaw Configuration</span>
-            </div>
-
-            <div className={styles.formRow}>
-              <div className={styles.formField}>
-                <label className={styles.fieldLabel}>Tooth Position <span className={styles.required}>*</span></label>
-                <select
-                  className={styles.select}
-                  value={toothType}
-                  onChange={(e) => setToothType(e.target.value)}
-                >
-                  <option value="">Select jaw position</option>
-                  {JAW_POSITIONS.map(o => (
-                    <option key={o.value} value={o.value}>{o.label}</option>
-                  ))}
-                </select>
-              </div>
-
-              <div className={styles.formField}>
-                <label className={styles.fieldLabel}>
-                  Stent Option
-                  <span className={styles.optionalTag}>optional</span>
-                </label>
-                <select
-                  className={styles.select}
-                  value={stentOption}
-                  onChange={(e) => setStentOption(e.target.value)}
-                >
-                  <option value="">None — opt out</option>
-                  {STENT_POSITIONS.map(o => (
-                    <option key={o.value} value={o.value}>{o.label}</option>
-                  ))}
-                </select>
-              </div>
-            </div>
-          </div>
-
+          
           {/* Section: Radiation Shield (NEW) */}
           <div className={styles.sectionCard}>
             <div className={styles.sectionHeader}>
               <ShieldIcon />
-              <span>Radiation Shield Planning</span>
-              <span className={styles.sectionBadge}>Oral Care</span>
+              <span>Stent Type</span>
+              {/* <span className={styles.sectionBadge}>Oral Care</span> */}
             </div>
-
-            <p className={styles.sectionDesc}>
-              Select the shield coverage zone to protect remaining healthy teeth from scatter
-              radiation during treatment. Leave unselected to opt out.
-            </p>
 
             <div className={styles.shieldGrid}>
               {SHIELD_OPTIONS.map((opt) => (
@@ -321,8 +276,8 @@ const UploadStep = ({ onConfirm }) => {
               <button
                 className={styles.confirmBtn}
                 onClick={handleConfirm}
-                disabled={!toothType}
-                title={!toothType ? 'Please select a tooth position first' : undefined}
+                // disabled={!toothType}
+                // title={!toothType ? 'Please select a tooth position first' : undefined}
               >
                 Confirm & Process
                 <ArrowIcon />
@@ -358,6 +313,7 @@ const UploadStep = ({ onConfirm }) => {
               key={viewerKey}
               scan1={selectedPreview === 'scan1' ? file1 : file2}
               scan2={null}
+              autoRotate={false}
             />
 
             <div className={styles.viewerOverlay}>
@@ -381,10 +337,10 @@ const UploadStep = ({ onConfirm }) => {
             <SummaryRow label="Previewing" value={
               selectedPreview === 'scan1' ? 'Primary Scan' : 'Antagonist Scan'
             } />
-            <SummaryRow label="Jaw position"
+            {/* <SummaryRow label="Jaw position"
               value={JAW_POSITIONS.find(o => o.value === toothType)?.label || '—'} />
             <SummaryRow label="Stent"
-              value={STENT_POSITIONS.find(o => o.value === stentOption)?.label || 'None'} />
+              value={STENT_POSITIONS.find(o => o.value === stentOption)?.label || 'None'} /> */}
             <SummaryRow label="Radiation shield"
               value={SHIELD_OPTIONS.find(o => o.value === shieldOption)?.label || 'Not selected'}
               highlight={Boolean(shieldOption)}

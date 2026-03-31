@@ -8,7 +8,17 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
  *   1. File-based (upload preview): scan1 / scan2 as File objects
  *   2. URL-based (AI result): stlUrl as URL string
  */
-const STLViewerR3F = ({ scan1, scan2, stlUrl }) => {
+const STLViewerR3F = ({ 
+  scan1, 
+  scan2, 
+  stlUrl,
+  autoRotate = true,
+  wireframe = false,
+  accentColor = '#E8D5C3',
+  background = '#111820',
+  enablePan = true,
+  showGrid = false
+}) => {
   const mountRef = useRef(null);
   const sceneRef = useRef({});
 
@@ -46,7 +56,7 @@ const STLViewerR3F = ({ scan1, scan2, stlUrl }) => {
 
     // ── Scene ──────────────────────────────────────────────────────────────
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color('#111820'); // very dark neutral — max contrast
+    scene.background = new THREE.Color(background);
 
     // No grid for clean, professional appearance
 
@@ -72,7 +82,7 @@ const STLViewerR3F = ({ scan1, scan2, stlUrl }) => {
     controls.rotateSpeed    = 0.9;
     controls.zoomSpeed      = 1.0;
     controls.panSpeed       = 0.8;
-    controls.enablePan      = true;   // allow pan for measurement inspection
+    controls.enablePan      = enablePan;
     controls.enableZoom     = true;
     controls.enableRotate   = true;
     // Full sphere — no polar restrictions so clinicians can inspect from any angle
@@ -80,6 +90,8 @@ const STLViewerR3F = ({ scan1, scan2, stlUrl }) => {
     controls.maxPolarAngle  = Math.PI;
     controls.minDistance    = 5;
     controls.maxDistance    = 10000;
+    controls.autoRotate     = autoRotate;
+    controls.autoRotateSpeed = 2.0;
 
     // ── Process each geometry: centre + scale to 100 units ─────────────────
     const meshes = [];
@@ -104,10 +116,11 @@ const STLViewerR3F = ({ scan1, scan2, stlUrl }) => {
 
       // ── Clinical material: bright matte, no tint, DoubleSide ─────────────
       const material = new THREE.MeshStandardMaterial({
-        color:     new THREE.Color(color),
+        color:     new THREE.Color(accentColor),
         metalness: 0.0,
         roughness: 0.65,   // matte → every ridge and groove casts a readable shadow
         side:      THREE.DoubleSide,
+        wireframe: wireframe,
       });
 
       const mesh = new THREE.Mesh(geom, material);
@@ -194,7 +207,7 @@ const STLViewerR3F = ({ scan1, scan2, stlUrl }) => {
         (geometry) => {
           console.log('STLViewerR3F: URL loaded successfully');
           geometry.computeVertexNormals();
-          initScene([{ geom: geometry, color: '#E8D5C3' }]);
+          initScene([{ geom: geometry, color: accentColor }]);
         },
         (progress) => {
           console.log('STLViewerR3F: Loading', Math.round((progress.loaded / progress.total) * 100) + '%');
@@ -208,8 +221,8 @@ const STLViewerR3F = ({ scan1, scan2, stlUrl }) => {
 
     // File-based mode (upload preview)
     const files   = [
-      { file: scan1, color: '#E8D5C3' },
-      scan2 ? { file: scan2, color: '#E8D5C3' } : null,
+      { file: scan1, color: accentColor },
+      scan2 ? { file: scan2, color: accentColor } : null,
     ].filter(Boolean);
 
     const results  = new Array(files.length);
@@ -235,7 +248,25 @@ const STLViewerR3F = ({ scan1, scan2, stlUrl }) => {
     });
 
     return cleanup;
-  }, [stlUrl, scan1, scan2, initScene, cleanup]);
+  }, [stlUrl, scan1, scan2, initScene, cleanup, accentColor]);
+
+  // ── Update wireframe mode when toggled ──────────────────────────────────
+  useEffect(() => {
+    if (sceneRef.current.meshes) {
+      sceneRef.current.meshes.forEach(mesh => {
+        if (mesh.material) {
+          mesh.material.wireframe = wireframe;
+        }
+      });
+    }
+  }, [wireframe]);
+
+  // ── Update autoRotate when toggled ──────────────────────────────────────
+  useEffect(() => {
+    if (sceneRef.current.controls) {
+      sceneRef.current.controls.autoRotate = autoRotate;
+    }
+  }, [autoRotate]);
 
   return (
     <div
