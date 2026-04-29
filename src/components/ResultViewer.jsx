@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import STLViewer from './STLViewerR3F';
 import styles from './ResultViewer.module.css';
 
@@ -8,6 +8,16 @@ const SHIELD_LABELS = {
   reduced:       'Reduced Coverage',
   upper:         'Upper Arch Full',
 };
+
+const PROGRESS_STEPS = [
+  'Removing teeth',
+  'Filling empty holes',
+  'Generating splint surface',
+  'Solidify splint',
+  'Generating wall segment',
+  'Tongue blade displacement',
+  'Prong adjustment',
+];
 
 const ResultViewer = ({ resultUrl, scanData, onStartOver, onSetResultUrl, sampleResultUrl }) => {
   const originalFile  = scanData?.scan1;
@@ -27,12 +37,40 @@ const ResultViewer = ({ resultUrl, scanData, onStartOver, onSetResultUrl, sample
   const [autoRotate,  setAutoRotate]  = useState(true);
   const [viewerKey,   setViewerKey]   = useState(0);
   const [isLoading,   setIsLoading]   = useState(false);
+  const [progressIndex, setProgressIndex] = useState(0);
 
   const accentColor = wireframe ? '#3E4A5A' : '#E8D5C3';
 
   const handleReset = () => setViewerKey(k => k + 1);
 
   const canRender = Boolean(resultUrl);
+  const isWaitingForResult = Boolean(scanData && !resultUrl);
+  const progressPercentage = Math.min(100, Math.round((progressIndex / PROGRESS_STEPS.length) * 100));
+  const currentStep = PROGRESS_STEPS[Math.min(progressIndex, PROGRESS_STEPS.length - 1)] || 'Preparing AI generation...';
+
+  useEffect(() => {
+    if (!scanData || canRender) {
+      setProgressIndex(0);
+      return undefined;
+    }
+
+    setProgressIndex(0);
+
+    const timers = [];
+    const delayPerStep = 900;
+
+    PROGRESS_STEPS.forEach((step, index) => {
+      timers.push(window.setTimeout(() => {
+        setProgressIndex(index + 1);
+
+        if (index === PROGRESS_STEPS.length - 1 && !resultUrl && typeof onSetResultUrl === 'function' && sampleResultUrl) {
+          onSetResultUrl(sampleResultUrl);
+        }
+      }, delayPerStep * (index + 1)));
+    });
+
+    return () => timers.forEach(window.clearTimeout);
+  }, [scanData, canRender, onSetResultUrl, resultUrl, sampleResultUrl]);
 
   return (
     <div className={styles.container}>
@@ -82,12 +120,29 @@ const ResultViewer = ({ resultUrl, scanData, onStartOver, onSetResultUrl, sample
                 enablePan={true}
               />
             </>
+          ) : isWaitingForResult ? (
+            <div className={styles.progressState}>
+              <div className={styles.progressHeader}>
+                <p className={styles.progressTitle}>AI design in progress</p>
+                <p className={styles.progressSub}>
+                  This is a prototype loading screen; the real AI build may take longer.
+                </p>
+              </div>
+
+              <div className={styles.progressBar}>
+                <div className={styles.progressBarFill} style={{ width: `${progressPercentage}%` }} />
+                <div className={styles.progressBarLabel}>{currentStep}</div>
+              </div>
+
+              <div className={styles.progressCurrent}>
+                <span>Step {Math.min(progressIndex + 1, PROGRESS_STEPS.length)} of {PROGRESS_STEPS.length}</span>
+              </div>
+            </div>
           ) : (
             <div className={styles.emptyState}>
               <p className={styles.emptyTitle}>No AI CAD model yet</p>
               <p className={styles.emptySub}>
-                Upload preview is for scan verification only. Paste the AI STL URL above to render
-                the final 3D CAD model here.
+                Upload preview is for scan verification only.
               </p>
               <div className={styles.emptyMeta}>
                 <span>Uploaded scan:</span>
@@ -139,7 +194,6 @@ const ResultViewer = ({ resultUrl, scanData, onStartOver, onSetResultUrl, sample
           <div className={styles.toolHints}>
             <HintPill icon="🖱️" text="Drag to rotate" />
             <HintPill icon="⚲"  text="Scroll to zoom" />
-            <HintPill icon="⇧"  text="Right-drag to pan" />
           </div>
         </div>
       </div>
@@ -147,18 +201,12 @@ const ResultViewer = ({ resultUrl, scanData, onStartOver, onSetResultUrl, sample
       {/* ── Info Bar ────────────────────────────────────────────────────────── */}
       <div className={styles.infoBar}>
         <InfoItem label="Source"     value={originalFile?.name || '—'} mono />
-        <InfoItem label="Position"   value={formatOption(toothPosition)} />
-        {stentOption
-          ? <InfoItem label="Stent" value={formatOption(stentOption)} />
-          : <InfoItem label="Stent" value="None" />
-        }
-        <InfoItem label="Shield"
+        <InfoItem label="Stentra Type"
           value={shieldOption ? (SHIELD_LABELS[shieldOption] || formatOption(shieldOption)) : 'None'}
           highlight={Boolean(shieldOption)}
         />
         <InfoItem label="Format"     value="STL Mesh" />
         <InfoItem label="Status"     value="AI Generated" highlight />
-        <InfoItem label="Engine"     value="Neural CAD v2" />
         <div className={styles.downloadWrap}>
           <button className={styles.downloadBtn} disabled={!canRender}>
             <DownloadIcon /> Download STL

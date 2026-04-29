@@ -1,10 +1,11 @@
 import React from "react";
 import LoginStep from "./components/LoginStep";
+import RegisterStep from "./components/RegisterStep";
 import UploadStep from "./components/UploadStep";
 import ResultViewer from "./components/ResultViewer";
 
 function App() {
-  const [step, setStep] = React.useState("login"); // 'login' | 'upload' | 'result'
+  const [step, setStep] = React.useState("login"); // 'login' | 'register' | 'upload' | 'result'
   const [user, setUser] = React.useState(null);
   const [scanData, setScanData] = React.useState(null);
   const [resultUrl, setResultUrl] = React.useState(null);
@@ -25,17 +26,21 @@ function App() {
     setStep("login");
   };
 
+  const handleOpenRegister = () => {
+    setStep("register");
+  };
+
+  const handleRegisterSuccess = (userData) => {
+    console.log('User registered:', userData);
+    setUser(userData);
+    setStep("upload");
+  };
+
   const handleConfirm = (data) => {
     console.log('Upload confirmed with data:', data);
     setScanData(data);
     setResultUrl(null);
     setStep("result");
-
-    // Simulate AI processing
-    setTimeout(() => {
-      console.log('Setting result URL:', sampleResultUrl);
-      setResultUrl(sampleResultUrl);
-    }, 1200);
   };
 
   const handleStartOver = () => {
@@ -47,7 +52,12 @@ function App() {
   return (
     <div>
       {step === "login" ? (
-        <LoginStep onLogin={handleLogin} />
+        <LoginStep onLogin={handleLogin} onRegister={handleOpenRegister} />
+      ) : step === "register" ? (
+        <RegisterStep
+          onRegisterSuccess={handleRegisterSuccess}
+          onBackToLogin={() => setStep("login")}
+        />
       ) : (
         <>
           <div style={{ 
@@ -59,7 +69,7 @@ function App() {
             borderBottom: "2px solid #e2e8f0"
           }}>
             <h2 style={{ margin: 0, color: "#1ed7c3", fontSize: "20px", fontWeight: "700" }}>
-              ioLifeScience - Dental CAD Viewer
+              Kallisio Stentra Design System
             </h2>
             <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>
               <span style={{ color: "#94a3b8", fontSize: "14px" }}>

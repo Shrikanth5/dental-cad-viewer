@@ -126,21 +126,18 @@ const UploadStep = ({ onConfirm }) => {
             <h2 className={styles.dropTitle}>Upload Dental Scan</h2>
 
             <p className={styles.dropSub}>
-              Drag & drop your primary <span>.STL</span> scan here, or click to browse.<br />
-              A second scan (antagonist) can be added after.
+              Drag and drop (or upload) the maxilla and mandible <span>.STL</span> scan files here.
             </p>
 
             <div className={styles.specs}>
               <span>STL format</span>
               <span className={styles.dot} />
               <span>Max 200 MB</span>
-              <span className={styles.dot} />
-              <span>ASCII or Binary</span>
             </div>
 
             <div className={styles.radiationNote}>
               <ShieldIcon />
-              <span>Radiation stent planning for oral patients</span>
+              <span>Stentra–for head and neck cancer patients</span>
             </div>
           </div>
 
@@ -171,7 +168,7 @@ const UploadStep = ({ onConfirm }) => {
                 <FileIcon />
                 <div>
                   <p className={styles.fileName}>{file1.name}</p>
-                  <p className={styles.fileMeta}>{formatSize(file1.size)} · Primary Scan</p>
+                  <p className={styles.fileMeta}>{formatSize(file1.size)} · Mandible</p>
                 </div>
               </div>
               <button
@@ -200,7 +197,7 @@ const UploadStep = ({ onConfirm }) => {
                     <FileIcon />
                     <div>
                       <p className={styles.fileName}>{file2.name}</p>
-                      <p className={styles.fileMeta}>{formatSize(file2.size)} · Antagonist Scan</p>
+                      <p className={styles.fileMeta}>{formatSize(file2.size)} · Maxilla</p>
                     </div>
                   </div>
                   <button
@@ -213,7 +210,7 @@ const UploadStep = ({ onConfirm }) => {
               ) : (
                 <div className={styles.secondScanEmpty}>
                   <PlusIcon />
-                  <span>Add second scan <em>(optional — antagonist jaw)</em></span>
+                  <span>Add Maxilla scan</span>
                 </div>
               )}
             </div>
@@ -224,7 +221,7 @@ const UploadStep = ({ onConfirm }) => {
           <div className={styles.sectionCard}>
             <div className={styles.sectionHeader}>
               <ShieldIcon />
-              <span>Stent Type</span>
+              <span>Stentra Type</span>
               {/* <span className={styles.sectionBadge}>Oral Care</span> */}
             </div>
 
@@ -297,13 +294,13 @@ const UploadStep = ({ onConfirm }) => {
                 className={`${styles.previewBtn} ${selectedPreview === 'scan1' ? styles.previewBtnActive : ''}`}
                 onClick={() => setSelectedPreview('scan1')}
               >
-                Primary Scan
+                Mandible
               </button>
               <button
                 className={`${styles.previewBtn} ${selectedPreview === 'scan2' ? styles.previewBtnActive : ''}`}
                 onClick={() => setSelectedPreview('scan2')}
               >
-                Antagonist Scan
+                Maxilla
               </button>
             </div>
           )}
@@ -332,16 +329,16 @@ const UploadStep = ({ onConfirm }) => {
 
           {/* Summary card beneath viewer */}
           <div className={styles.summaryCard}>
-            <SummaryRow label="Primary scan" value={file1?.name} mono />
-            {file2 && <SummaryRow label="Antagonist" value={file2.name} mono />}
+            <SummaryRow label="Mandible" value={file1?.name} mono />
+            {file2 && <SummaryRow label="Maxilla" value={file2.name} mono />}
             <SummaryRow label="Previewing" value={
-              selectedPreview === 'scan1' ? 'Primary Scan' : 'Antagonist Scan'
+              selectedPreview === 'scan1' ? 'Mandible' : 'Maxilla'
             } />
             {/* <SummaryRow label="Jaw position"
               value={JAW_POSITIONS.find(o => o.value === toothType)?.label || '—'} />
             <SummaryRow label="Stent"
               value={STENT_POSITIONS.find(o => o.value === stentOption)?.label || 'None'} /> */}
-            <SummaryRow label="Radiation shield"
+            <SummaryRow label="Stentra Type"
               value={SHIELD_OPTIONS.find(o => o.value === shieldOption)?.label || 'Not selected'}
               highlight={Boolean(shieldOption)}
             />

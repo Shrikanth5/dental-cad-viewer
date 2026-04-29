@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import styles from './LoginStep.module.css';
 
-export default function LoginStep({ onLogin }) {
+export default function LoginStep({ onLogin, onRegister }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -31,12 +31,14 @@ export default function LoginStep({ onLogin }) {
     }, 1000);
   };
 
-  const handleDemoLogin = () => {
-    setIsLoading(true);
-    setTimeout(() => {
-      setIsLoading(false);
-      onLogin({ email: 'demo@iolifescience.com', userName: 'demo' });
-    }, 1000);
+  const handleRegister = () => {
+    setError('');
+    if (typeof onRegister === 'function') {
+      onRegister();
+      return;
+    }
+
+    setError('Registration flow is not configured yet. Please contact administrator.');
   };
 
   return (
@@ -89,8 +91,8 @@ export default function LoginStep({ onLogin }) {
               />
             </svg>
           </div>
-          <h1 className={styles.brandName}>ioLifeScience</h1>
-          <p className={styles.subtitle}>Dental CAD Stent Planning System</p>
+          <h1 className={styles.brandName}>kallisio</h1>
+          <p className={styles.subtitle}>Stentra Design System </p>
         </div>
 
         {/* Login Form */}
@@ -142,22 +144,22 @@ export default function LoginStep({ onLogin }) {
           </button>
         </form>
 
-        {/* Demo Login Option */}
+        {/* Register Option */}
         <div className={styles.divider}>or</div>
         
         <button
           type="button"
           className={styles.demoBtn}
-          onClick={handleDemoLogin}
+          onClick={handleRegister}
           disabled={isLoading}
         >
-          Try Demo Login
+          Register
         </button>
 
         {/* Footer */}
         <div className={styles.footer}>
           <p className={styles.footerText}>
-            Protected by ioLifeScience Secure Platform
+            Kallisio Inc. proprietary & confidential
           </p>
         </div>
       </div>
